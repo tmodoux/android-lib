@@ -3,14 +3,14 @@ package com.pryv;
 import android.content.Context;
 
 import com.pryv.api.OnlineEventsAndStreamsManager;
-import com.pryv.database.DBHelper;
-import com.pryv.database.DBinitCallback;
-import com.pryv.model.Stream;
 import com.pryv.connection.ConnectionAccesses;
 import com.pryv.connection.ConnectionAccount;
 import com.pryv.connection.ConnectionEvents;
 import com.pryv.connection.ConnectionProfile;
 import com.pryv.connection.ConnectionStreams;
+import com.pryv.database.DBHelper;
+import com.pryv.database.DBinitCallback;
+import com.pryv.model.Stream;
 import com.pryv.utils.Logger;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Pryv API connection - Object used to manipulate Events and Streams data.
  */
-public class Connection extends AbstractConnection {
+public class Connection implements AbstractConnection {
 
     public ConnectionAccesses accesses;
     public ConnectionAccount account;
@@ -49,7 +49,6 @@ public class Connection extends AbstractConnection {
     private WeakReference<AbstractConnection> weakConnection;
 
     private Context context;
-
     /**
      * Streams with no parent stream. the key is the id
      */

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class SQLiteDBHelper extends DBHelper {
+public class SQLiteDBHelper extends SQLiteOpenHelper implements DBHelper{
 
     private final String initDBerrorMessage = "Database initialization error: ";
     // weak reference to Pryv's Connection
@@ -57,6 +58,7 @@ public class SQLiteDBHelper extends DBHelper {
     public SQLiteDBHelper(Context context, Filter scope, String cacheFolderPath, OnlineEventsAndStreamsManager api,
                           WeakReference<AbstractConnection> weakConnection,
                           DBinitCallback initCallback) {
+        super(context, Pryv.DATABASE_NAME, null, DATABASE_VERSION);
         this.scope = scope;
         this.api = api;
         this.weakConnection = weakConnection;
@@ -69,6 +71,7 @@ public class SQLiteDBHelper extends DBHelper {
      */
     public void onCreate(SQLiteDatabase db) {
         this.db = db;
+
         try {
             createEventsTable();
             createSteamsTable();

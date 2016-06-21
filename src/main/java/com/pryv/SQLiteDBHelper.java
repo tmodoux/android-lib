@@ -47,6 +47,8 @@ public class SQLiteDBHelper extends SQLiteOpenHelper implements DBHelper{
 
     private static final int DATABASE_VERSION = 1;
 
+    private SQLiteDatabase db;
+
     /**
      * SQLiteDBHelper constructor. Creates and Connects to the SQLite database
      *
@@ -69,6 +71,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper implements DBHelper{
      * Creates tables if required.
      */
     public void onCreate(SQLiteDatabase db) {
+        this.db = db;
         try {
             createEventsTable();
             createSteamsTable();
@@ -101,7 +104,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper implements DBHelper{
      * @throws SQLException
      */
     private void createEventsTable() throws SQLException {
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
         String cmd = QueryGenerator.createEventsTable();
         logger.log("SQLiteDBHelper: createEventsTable: " + cmd);
         db.execSQL(cmd);
@@ -113,7 +116,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper implements DBHelper{
      * @throws SQLException
      */
     private void createSteamsTable() throws SQLException {
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
         String cmd = QueryGenerator.createStreamsTable();
         logger.log("SQLiteDBHelper: createStreamsTable: " + cmd);
         db.execSQL(cmd);
@@ -136,10 +139,12 @@ public class SQLiteDBHelper extends SQLiteOpenHelper implements DBHelper{
         api.getEvents(filter, new GetEventsCallback() {
 
             @Override
-            public void cacheCallback(List<Event> events, Map<String, Double> eventDeletions) {}
+            public void cacheCallback(List<Event> events, Map<String, Double> eventDeletions) {
+            }
 
             @Override
-            public void onCacheError(String errorMessage) {}
+            public void onCacheError(String errorMessage) {
+            }
 
             @Override
             public void apiCallback(List<Event> events, Map<String, Double> eventDeletions, Double serverTime) {
@@ -174,7 +179,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper implements DBHelper{
             @Override
             public void run() {
                 try {
-                    SQLiteDatabase db = SQLiteDBHelper.this.getWritableDatabase();
+                    SQLiteDatabase db = getWritableDatabase();
                     String cmd = QueryGenerator.insertOrReplaceEvent(eventToCache);
                     logger.log("SQLiteDBHelper: create event: " + cmd);
                     db.execSQL(cmd);
@@ -206,7 +211,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper implements DBHelper{
 
             public void run() {
                 try {
-                    SQLiteDatabase db = SQLiteDBHelper.this.getWritableDatabase();
+                    SQLiteDatabase db = getWritableDatabase();
 
                     String cmd = QueryGenerator.updateEvent(eventToUpdate);
                     logger.log("SQLiteDBHelper: update event: " + cmd);
@@ -243,7 +248,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper implements DBHelper{
 
                 for (Event event : eventsToCache) {
                     try {
-                        SQLiteDatabase db = SQLiteDBHelper.this.getWritableDatabase();
+                        SQLiteDatabase db = getWritableDatabase();
                         String cmd = QueryGenerator.insertOrReplaceEvent(event);
                         logger.log("SQLiteDBHelper: update or create event : " + cmd);
                         db.execSQL(cmd);
@@ -277,7 +282,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper implements DBHelper{
             @Override
             public void run() {
                 try {
-                    SQLiteDatabase db = SQLiteDBHelper.this.getWritableDatabase();
+                    SQLiteDatabase db = getWritableDatabase();
                     String fetchCmd = QueryGenerator.retrieveEvent(eventToDelete.getClientId());
                     Cursor result = db.rawQuery(fetchCmd,null);
                     if (result.moveToFirst()) {
@@ -337,7 +342,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper implements DBHelper{
             @Override
             public void run() {
                 try {
-                    SQLiteDatabase db = SQLiteDBHelper.this.getReadableDatabase();
+                    SQLiteDatabase db = getWritableDatabase();
                     String cmd = QueryGenerator.retrieveEvents(filter);
                     logger.log("SQLiteDBHelper: get: " + cmd);
                     Cursor result = db.rawQuery(cmd,null);
@@ -381,7 +386,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper implements DBHelper{
             @Override
             public void run() {
                 try {
-                    SQLiteDatabase db = SQLiteDBHelper.this.getWritableDatabase();
+                    SQLiteDatabase db = getWritableDatabase();
                     String cmd = QueryGenerator.insertOrReplaceStream(streamToCache);
                     logger.log("SQLiteDBHelper: update or create Stream : " + cmd);
                     db.execSQL(cmd);
@@ -419,7 +424,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper implements DBHelper{
                 logger.log("SQLiteDBHelper: update or create streams");
                 for (Stream stream : streamsToCache) {
                     try {
-                        SQLiteDatabase db = SQLiteDBHelper.this.getWritableDatabase();
+                        SQLiteDatabase db = getWritableDatabase();
                         String cmd = QueryGenerator.insertOrReplaceStream(stream);
                         logger.log("SQLiteDBHelper: update or create Stream stream: id="
                                 + stream.getId()
@@ -481,7 +486,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper implements DBHelper{
             public void run() {
                 String cmd;
                 try {
-                    SQLiteDatabase db = SQLiteDBHelper.this.getWritableDatabase();
+                    SQLiteDatabase db = getWritableDatabase();
                     // retrieve Stream
                     cmd = QueryGenerator.retrieveStream(streamToDelete.getId());
                     Cursor result = db.rawQuery(cmd,null);
@@ -601,7 +606,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper implements DBHelper{
             @Override
             public void run() {
                 try {
-                    SQLiteDatabase db = SQLiteDBHelper.this.getReadableDatabase();
+                    SQLiteDatabase db = getWritableDatabase();
 
                     String cmd = QueryGenerator.retrieveStreams();
                     logger.log("SQLiteDBHelper: get: "
@@ -699,6 +704,14 @@ public class SQLiteDBHelper extends SQLiteOpenHelper implements DBHelper{
         event.setAttachments(JsonConverter.deserializeAttachments(attachment));
         event.setClientDataFromAstring(clientData);
         return event;
+    }
+
+    @Override
+    public SQLiteDatabase getWritableDatabase() {
+        if(db != null){
+            return db;
+        }
+        return super.getWritableDatabase();
     }
 
 }
